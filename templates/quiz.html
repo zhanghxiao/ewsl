@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>英语单词学习系统</title>
+</head>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #4F86ED, #2F5EBA);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #fff;
+      color: #4F86ED;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    nav {
+            padding: 10px;
+            text-align: center;
+            border-radius: 20px; /* body背景的圆角半径 */
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #333; /* 黑色字体 */
+            padding: 10px 25px;
+            margin: 0 10px;
+            border: 2px solid #4682b4; /* 深蓝色边框 */
+            border-radius: 8px;
+            background-color: #fff; /* 白色背景 */
+            transition: background-color 0.3s;
+            box-sizing: border-box; /* 新增此属性 */
+            font-weight: bold; /* 设置菜单项的字体为粗体 */
+        }
+
+        nav a:hover {
+            background-color: #87ceeb; /* 鼠标悬停时淡蓝色背景 */
+        }
+    nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+    }
+    nav ul li {
+      margin-right: 20px;
+    }
+    .learn {
+      text-align: center;
+      padding: 20px;
+    }
+    .learn h2 {
+      margin-bottom: 20px;
+    }
+    .learn p {
+      margin-bottom: 10px;
+    }
+    .learn button {
+      padding: 10px 20px;
+      background: #4F86ED;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-size: 1.2em;
+    }
+    .learn .word-info {
+      background: #fff;
+      color: #4F86ED;
+      padding: 20px;
+      margin: 0 auto;
+      width: 600px;
+    }
+    .learn .word-info ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .learn .word-info ul li {
+      margin-bottom: 10px;
+    }
+    .learn .progress {
+      background: #fff;
+      color: #4F86ED;
+      padding: 20px;
+      margin: 0 auto;
+      width: 600px;
+    }
+    .learn .progress ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      justify-content: space-between;
+    }
+    .learn .progress ul li {
+      margin-right: 20px;
+    }
+  </style>
+<body>
+  <header>
+    <h1>英语单词学习系统</h1>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('index') }}">首页</a></li>
+        <li><a href="{{ url_for('learn') }}">单词学习与测试</a></li>
+        <!-- 添加一个下拉菜单，让用户选择不同的单词列表 -->
+        <li>
+          <select id="word-list-select" onchange="change_word_list()">
+            <option value="beginner">初级</option>
+            <option value="intermediate">中级</option>
+            <option value="advanced">高级</option>
+          </select>
+        </li>
+<!--        <li><a href="{{ url_for('quiz') }}">单词测试</a></li>-->
+        <li><a href="{{ url_for('game') }}">单词游戏</a></li>
+        <li><a href="{{ url_for('qa') }}">智能问答</a></li>
+        <li><a href="{{ url_for('user') }}">我的账户</a></li>
+        <li><a href="{{ url_for('logout') }}">登出</a></li>
+
+      </ul>
+    </nav>
+  </header>
+  <section class="quiz">
+    <h2>单词测试</h2>
+    <!-- 如果有单词，显示在这里 -->
+    {% if word %}
+    <div class="word">
+      <p>单词：{{ word }}</p>
+    </div>
+    <!-- 如果没有单词，显示提示信息 -->
+    {% else %}
+    <p>无效的单词</p>
+    {% endif %}
+    <!-- 显示一个表单，让用户回答单词的选择题，填空题，判断题等 -->
+    <form action="{{ url_for('quiz', word=word) }}" method="POST">
+      <input type="hidden" name="word" value="{{ word }}">
+      <p>选择题：{{ word }}的同义词是？</p>
+      <label for="choice_a">A. {{ word_info.choice_a }}</label>
+      <input type="radio" id="choice_a" name="choice_answer" value="A"><br>
+      <label for="choice_b">B. {{ word_info.choice_b }}</label>
+      <input type="radio" id="choice_b" name="choice_answer" value="B"><br>
+      <label for="choice_c">C. {{ word_info.choice_c }}</label>
+      <input type="radio" id="choice_c" name="choice_answer" value="C"><br>
+      <label for="choice_d">D. {{ word_info.choice_d }}</label>
+      <input type="radio" id="choice_d" name="choice_answer" value="D"><br>
+
+      <p>填空题：用{{ word }}填空。</p>
+      <p>{{ word_info.blank_question }}</p>
+      <input type="text" id="blank_answer" name="blank_answer" required><br>
+      <p>判断题：{{ word_info.judge_question }}（对或错）</p>
+      <label for="judge_true">对</label>
+      <input type="radio" id="judge_true" name="judge_answer" value="True"><br>
+      <label for="judge_false">错</label>
+      <input type="radio" id="judge_false" name="judge_answer" value="False"><br>
+      <!-- 显示一个提交按钮 -->
+      <button type="submit">提交</button>
+    </form>
+    <!-- 显示返回按钮 -->
+    <button onclick="window.location.href='{{ url_for('learn') }}'">返回</button>
+  </section>
+  <script>
+    // 定义一个函数，用于处理用户选择不同的单词列表的事件
+    function change_word_list() {
+      // 获取用户选择的单词列表的值
+      var word_list = document.getElementById("word-list-select").value;
+      // 发送一个GET请求，带上单词列表的参数，到一个新的路由，比如/learn_word_list
+      window.location.href = "/learn_word_list?word_list=" + word_list;
+    }
+  </script>
+</body>
+</html>

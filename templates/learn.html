@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>英语单词学习系统</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #4F86ED, #2F5EBA);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #fff;
+      color: #4F86ED;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    nav {
+            padding: 10px;
+            text-align: center;
+            border-radius: 20px; /* body背景的圆角半径 */
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #333; /* 黑色字体 */
+            padding: 10px 25px;
+            margin: 0 10px;
+            border: 2px solid #4682b4; /* 深蓝色边框 */
+            border-radius: 8px;
+            background-color: #fff; /* 白色背景 */
+            transition: background-color 0.3s;
+            box-sizing: border-box; /* 新增此属性 */
+            font-weight: bold; /* 设置菜单项的字体为粗体 */
+        }
+
+        nav a:hover {
+            background-color: #87ceeb; /* 鼠标悬停时淡蓝色背景 */
+        }
+    nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+    }
+    nav ul li {
+      margin-right: 20px;
+    }
+    .learn {
+      text-align: center;
+      padding: 20px;
+    }
+    .learn h2 {
+      margin-bottom: 20px;
+    }
+    .learn p {
+      margin-bottom: 10px;
+    }
+    .learn button {
+      padding: 10px 20px;
+      background: #4F86ED;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-size: 1.2em;
+    }
+    .learn .word-info {
+      background: #fff;
+      color: #4F86ED;
+      padding: 20px;
+      margin: 0 auto;
+      width: 600px;
+    }
+    .learn .word-info ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .learn .word-info ul li {
+      margin-bottom: 10px;
+    }
+    .learn .progress {
+      background: #fff;
+      color: #4F86ED;
+      padding: 20px;
+      margin: 0 auto;
+      width: 600px;
+    }
+    .learn .progress ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      justify-content: space-between;
+    }
+    .learn .progress ul li {
+      margin-right: 20px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>英语单词学习系统</h1>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('index') }}">首页</a></li>
+        <li><a href="{{ url_for('learn') }}">单词学习与测试</a></li>
+        <!-- 添加一个下拉菜单，让用户选择不同的单词列表 -->
+        <li>
+          <select id="word-list-select" onchange="change_word_list()">
+            <option value="beginner">初级</option>
+            <option value="intermediate">中级</option>
+            <option value="advanced">高级</option>
+          </select>
+        </li>
+<!--        <li><a href="{{ url_for('quiz') }}">单词测试</a></li>-->
+        <li><a href="{{ url_for('game') }}">单词游戏</a></li>
+        <li><a href="{{ url_for('qa') }}">智能问答</a></li>
+        <li><a href="{{ url_for('user') }}">我的账户</a></li>
+        <li><a href="{{ url_for('logout') }}">登出</a></li>
+
+      </ul>
+    </nav>
+  </header>
+  <section class="learn">
+    <h2>单词学习</h2>
+    <!-- 如果有当前单词和当前单词的信息，显示在这里 -->
+    {% if current_word and current_word_info %}
+    <div class="word-info">
+      <ul>
+        <li>单词：{{ current_word }}</li>
+        <li>解释：{{ current_word_info.explanation }}</li>
+        <li>例句：{{ current_word_info.example }}</li>
+        <li>同义词：{{ current_word_info.synonym }}</li>
+        <li>反义词：{{ current_word_info.antonym }}</li>
+        <li>词根：{{ current_word_info.root }}</li>
+        <li>词缀：{{ current_word_info.affix }}</li>
+      </ul>
+    </div>
+    <!-- 如果没有当前单词和当前单词的信息，显示提示信息 -->
+    {% else %}
+    <p>没有更多的单词了</p>
+    {% endif %}
+    <!-- 显示上一个单词和下一个单词的按钮 -->
+    <button onclick="window.location.href='{{ url_for('learn_previous') }}'">上一个单词</button>
+    <button onclick="window.location.href='{{ url_for('learn_next') }}'">下一个单词</button>
+    <!-- 在单词信息的下方添加一些按钮，让用户查询，练习，测试单词 -->
+    <div class="word-actions">
+      <button onclick="window.location.href='{{ url_for('query', word=current_word) }}'">查询</button>
+      <button onclick="window.location.href='{{ url_for('practice', word=current_word) }}'">练习</button>
+      <button onclick="window.location.href='{{ url_for('quiz', word=current_word) }}'">测试</button>
+    </div>
+    <!-- 显示已学习的单词的数量，未学习的单词的数量，学习的进度百分比 -->
+    <div class="progress">
+      <ul>
+        <li>已学习的单词：{{ learned_words_count }}</li>
+        <li>未学习的单词：{{ unlearned_words_count }}</li>
+        <li>学习的进度：{{ progress_percentage }}%</li>
+      </ul>
+    </div>
+  </section>
+  <script>
+    // 定义一个函数，用于处理用户选择不同的单词列表的事件
+    function change_word_list() {
+      // 获取用户选择的单词列表的值
+      var word_list = document.getElementById("word-list-select").value;
+      // 发送一个GET请求，带上单词列表的参数，到一个新的路由，比如/learn_word_list
+      window.location.href = "/learn_word_list?word_list=" + word_list;
+    }
+  </script>
+</body>
+</html>
