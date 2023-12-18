@@ -1,14 +1,18 @@
 {
-    "builds": [
+    "routes": [
       {
-        "src": "app.py",
-        "use": "@vercel/python"
-      }
-    ],
-    "rewrites": [
+        "src": "/login",
+        "methods": ["GET", "POST"],
+        "dest": "/login.html"
+      },
       {
-        "source": "/(.*)",
-        "destination": "app.py"
+        "src": "/",
+        "dest": "/index.html"
+      },
+      {
+        "src": "/learn",
+        "methods": ["GET", "POST"],
+        "dest": "/learn.html"
       }
     ]
   }
